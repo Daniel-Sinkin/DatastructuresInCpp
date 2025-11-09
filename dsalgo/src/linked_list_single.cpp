@@ -11,7 +11,7 @@ void LinkedListSingle::pop_front()
     delete old_head;
 }
 
-bool LinkedListSingle::empty() const noexcept { return m_head == nullptr; }
+bool LinkedListSingle::is_empty() const noexcept { return m_head == nullptr; }
 
 LinkedListSingle::~LinkedListSingle()
 {

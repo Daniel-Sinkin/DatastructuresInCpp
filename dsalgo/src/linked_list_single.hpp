@@ -12,7 +12,7 @@ class LinkedListSingle
 public:
     void push_front(double v);
     void pop_front();
-    bool empty() const noexcept;
+    bool is_empty() const noexcept;
     ~LinkedListSingle();
 
 private:
