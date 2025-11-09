@@ -1,6 +1,5 @@
 // tests/test_list.cpp
 #include <cstddef>
-#include <print>
 #include <stdexcept>
 
 #include "common.hpp"
