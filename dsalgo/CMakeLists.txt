@@ -1,12 +1,15 @@
 # DSAlgo/CMakeLists
 add_library(DSAlgo STATIC
     src/list.cpp
+    src/linked_list_single.cpp
 )
 
 target_sources(DSAlgo PUBLIC
     FILE_SET  HEADERS
     BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
-    FILES     ${CMAKE_CURRENT_SOURCE_DIR}/src/list.hpp
+    FILES
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/list.hpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/linked_list_single.hpp
 )
 
 target_include_directories(DSAlgo PUBLIC

@@ -1,3 +1,6 @@
+// dsalgo/src/linked_list_single.hpp
+#pragma once
+
 struct LinkedListSingleNode
 {
     double value;
@@ -15,7 +18,3 @@ public:
 private:
     LinkedListSingleNode *m_head = nullptr;
 };
-
-int main()
-{
-}

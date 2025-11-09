@@ -15,5 +15,5 @@ target_link_libraries(MyProgram PRIVATE DSAlgo)
 
 include(CTest)
 if(BUILD_TESTING)
-    add_subdirectory(tests)
+  add_subdirectory(tests)
 endif()

@@ -7,7 +7,7 @@
 
 static List *g_ptr = nullptr;
 
-void test_list()
+int main()
 {
     List a{4};
     EXPECT_EQ(a.get_length(), std::size_t{0});
