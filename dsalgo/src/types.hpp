@@ -1,6 +1,7 @@
 // dsalgo/src/types.hpp
 #pragma once
 #include <concepts>
+#include <cstddef>
 #include <cstdint>
 
 #if __has_include(<stdfloat>)
@@ -22,9 +23,12 @@ using f32 = float;
 using f64 = double;
 #endif
 
+using usize = std::size_t;
+using isize = std::ptrdiff_t;
+
 inline constexpr bool use_f64 = true;
 using real = std::conditional_t<use_f64, f64, f32>;
 
 template <typename T>
-concept Hashable = std::same_as<T, u32> || std::same_as<T, u64> || std::same_as<T, std::size_t>;
+concept Hashable = std::same_as<T, u32> || std::same_as<T, u64> || std::same_as<T, usize>;
 } // namespace dsalgo

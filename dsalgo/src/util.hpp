@@ -1,12 +1,12 @@
 // dsalgo/src/util.hpp
 #pragma once
 
-#include <cstdint>
-
 #include "types.hpp"
 
 namespace dsalgo
 {
+constexpr bool is_power_of_two(usize n) { return (n & (n - 1)) == 0; }
+
 template <Hashable T>
 constexpr uint64_t hash_int(T x) noexcept
 {

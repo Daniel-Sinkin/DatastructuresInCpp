@@ -1,5 +1,7 @@
 // tests/common.hpp
 #pragma once
+#include "types.hpp"
+
 #include <stdexcept>
 #include <type_traits>
 #include <utility>

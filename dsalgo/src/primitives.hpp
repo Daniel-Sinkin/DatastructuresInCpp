@@ -1,6 +1,5 @@
 // dsalgo/src/primitives.hpp
 #pragma once
-#include <cstdint>
 #include <type_traits>
 
 #include "types.hpp"

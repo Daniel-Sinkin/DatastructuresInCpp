@@ -1,13 +1,12 @@
 // tests/test_linked_list_double.cpp
 #include "common.hpp"
 #include "linked_list_double.hpp"
-#include <cstddef>
 
 namespace dsalgo::Test
 {
-static std::size_t fwd_len(const LinkedListDoubleNode *h)
+static usize fwd_len(const LinkedListDoubleNode *h)
 {
-    std::size_t n = 0;
+    usize n = 0;
     for (auto *p = h; p; p = p->next)
     {
         ++n;
@@ -15,9 +14,9 @@ static std::size_t fwd_len(const LinkedListDoubleNode *h)
     return n;
 }
 
-static std::size_t back_len(const LinkedListDoubleNode *t)
+static usize back_len(const LinkedListDoubleNode *t)
 {
-    std::size_t n = 0;
+    usize n = 0;
     for (auto *p = t; p; p = p->prev)
     {
         ++n;
@@ -36,8 +35,8 @@ static void check_links(const LinkedListDouble &lst)
     }
     EXPECT_TRUE(head->prev == nullptr);
     EXPECT_TRUE(tail->next == nullptr);
-    std::size_t n1 = fwd_len(head);
-    std::size_t n2 = back_len(tail);
+    usize n1 = fwd_len(head);
+    usize n2 = back_len(tail);
     EXPECT_TRUE(n1 == n2);
     for (auto *p = head; p && p->next; p = p->next)
     {

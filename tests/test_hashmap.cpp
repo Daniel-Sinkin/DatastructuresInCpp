@@ -1,5 +1,7 @@
 // tests/tset_hashmap.cpp
+#include "common.hpp"
 #include "hashmap.hpp"
+
 namespace dsalgo::Test
 {
 

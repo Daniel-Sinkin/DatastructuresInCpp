@@ -19,11 +19,11 @@ struct NonTrivial
 static_assert(!std::is_trivially_copyable_v<NonTrivial>);
 
 template <class T>
-static void check_sequence_eq(const List<T> &lst, const T *vals, std::size_t n)
+static void check_sequence_eq(const List<T> &lst, const T *vals, usize n)
 {
     EXPECT_EQ(lst.get_length(), n);
     List<T> copy = lst;
-    for (std::size_t i = 0; i < n; ++i)
+    for (usize i = 0; i < n; ++i)
     {
         T got = copy.pop_back_return();
         const T &expect = vals[n - 1 - i];
@@ -33,20 +33,20 @@ static void check_sequence_eq(const List<T> &lst, const T *vals, std::size_t n)
 }
 
 template <class T>
-static void run_basic_push_copy_move(const T *vals, std::size_t n)
+static void run_basic_push_copy_move(const T *vals, usize n)
 {
     static_assert(std::is_trivially_copyable_v<T>);
     using L = List<T>;
 
     L a{0};
-    EXPECT_EQ(a.get_length(), std::size_t{0});
-    EXPECT_EQ(a.get_capacity(), std::size_t{0});
+    EXPECT_EQ(a.get_length(), usize{0});
+    EXPECT_EQ(a.get_capacity(), usize{0});
     EXPECT_TRUE(a.is_empty());
 
-    for (std::size_t i = 0; i < n; ++i)
+    for (usize i = 0; i < n; ++i)
         a.push_back(vals[i]);
     EXPECT_EQ(a.get_length(), n);
-    EXPECT_TRUE(a.get_capacity() >= std::size_t{4});
+    EXPECT_TRUE(a.get_capacity() >= usize{4});
     check_sequence_eq(a, vals, n);
 
     L b = a;
@@ -56,15 +56,15 @@ static void run_basic_push_copy_move(const T *vals, std::size_t n)
 
     L c = std::move(a);
     EXPECT_EQ(c.get_length(), n);
-    EXPECT_EQ(a.get_length(), std::size_t{0});
-    EXPECT_EQ(a.get_capacity(), std::size_t{0});
+    EXPECT_EQ(a.get_length(), usize{0});
+    EXPECT_EQ(a.get_capacity(), usize{0});
     check_sequence_eq(c, vals, n);
 
     L d{2};
-    for (std::size_t i = 0; i < n; ++i)
+    for (usize i = 0; i < n; ++i)
         d.push_back(vals[i]);
-    const std::size_t d_len = d.get_length();
-    const std::size_t d_cap = d.get_capacity();
+    const usize d_len = d.get_length();
+    const usize d_cap = d.get_capacity();
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
     d = d;
@@ -80,7 +80,7 @@ static void run_emplace_tests()
     {
         auto &ref = li.emplace_back(i);
         EXPECT_TRUE(ref == i);
-        EXPECT_EQ(li.get_length(), static_cast<std::size_t>(i + 1));
+        EXPECT_EQ(li.get_length(), static_cast<usize>(i + 1));
         EXPECT_TRUE(li.get_capacity() >= li.get_length());
     }
     for (int i = 9; i >= 0; --i)
@@ -93,7 +93,7 @@ static void run_emplace_tests()
     List<Vec3f> lv{0};
     lv.emplace_back(Vec3f{1.0f, 2.0f, 3.0f});
     lv.emplace_back(Vec3f{0.0f, 0.0f, 0.0f});
-    EXPECT_EQ(lv.get_length(), std::size_t{2});
+    EXPECT_EQ(lv.get_length(), usize{2});
     {
         Vec3f v = lv.pop_back_return();
         EXPECT_TRUE((v == Vec3f{0.0f, 0.0f, 0.0f}));
@@ -105,30 +105,30 @@ static void run_emplace_tests()
 
 static void run_growth_reserve_clear()
 {
-    List<std::size_t> l{0};
-    std::size_t last_cap = l.get_capacity();
+    List<usize> l{0};
+    usize last_cap = l.get_capacity();
     l.emplace_back(42zu);
-    EXPECT_TRUE(l.get_capacity() >= std::size_t{4});
+    EXPECT_TRUE(l.get_capacity() >= usize{4});
     EXPECT_TRUE(l.get_capacity() >= l.get_length());
     EXPECT_TRUE(l.get_capacity() >= last_cap);
     last_cap = l.get_capacity();
 
     for (int i = 0; i < 100; ++i)
     {
-        l.emplace_back(static_cast<std::size_t>(i));
+        l.emplace_back(static_cast<usize>(i));
         EXPECT_TRUE(l.get_capacity() >= l.get_length());
         EXPECT_TRUE(l.get_capacity() >= last_cap);
         last_cap = l.get_capacity();
     }
 
-    const std::size_t len_before = l.get_length();
-    const std::size_t cap_before = l.get_capacity();
+    const usize len_before = l.get_length();
+    const usize cap_before = l.get_capacity();
     l.reserve(cap_before + 50);
     EXPECT_EQ(l.get_length(), len_before);
     EXPECT_TRUE(l.get_capacity() >= cap_before + 50);
 
     l.clear();
-    EXPECT_EQ(l.get_length(), std::size_t{0});
+    EXPECT_EQ(l.get_length(), usize{0});
     EXPECT_EQ(l.get_capacity(), last_cap = l.get_capacity());
     EXPECT_TRUE(l.is_empty());
 }
@@ -199,31 +199,31 @@ int main()
     using namespace dsalgo::Test;
     {
         float vals[] = {0.0f, 1.5f, -2.25f, 100.0f, 3.25f};
-        run_basic_push_copy_move(vals, std::size_t{5});
+        run_basic_push_copy_move(vals, usize{5});
     }
     {
         double vals[] = {0.0, 1.5, -2.25, 100.0, 3.25};
-        run_basic_push_copy_move(vals, std::size_t{5});
+        run_basic_push_copy_move(vals, usize{5});
     }
     {
         std::uint32_t vals[] = {0u, 1u, 42u, 0xDEADBEEFu, 7u};
-        run_basic_push_copy_move(vals, std::size_t{5});
+        run_basic_push_copy_move(vals, usize{5});
     }
     {
         std::int32_t vals[] = {0, -1, 42, -100000, 7};
-        run_basic_push_copy_move(vals, std::size_t{5});
+        run_basic_push_copy_move(vals, usize{5});
     }
     {
-        std::size_t vals[] = {0zu, 1zu, 4096zu, 65535zu, 7zu};
-        run_basic_push_copy_move(vals, std::size_t{5});
+        usize vals[] = {0zu, 1zu, 4096zu, 65535zu, 7zu};
+        run_basic_push_copy_move(vals, usize{5});
     }
     {
         Vec3f vals[] = {{0.0f, 0.0f, 0.0f}, {1.0f, 2.0f, 3.0f}, {-3.0f, 4.0f, -5.0f}, {100.0f, -5.0f, 6.0f}};
-        run_basic_push_copy_move(vals, std::size_t{4});
+        run_basic_push_copy_move(vals, usize{4});
     }
     {
         Vec3d vals[] = {{0.0, 0.0, 0.0}, {1.0, 2.0, 3.0}, {-3.0, 4.0, -5.0}, {100.0, -5.0, 6.0}};
-        run_basic_push_copy_move(vals, std::size_t{4});
+        run_basic_push_copy_move(vals, usize{4});
     }
     {
         Vec4f vals[] = {
@@ -231,7 +231,7 @@ int main()
             {1.0f, 2.0f, 3.0f, 4.0f},
             {-3.0f, 4.0f, -5.0f, 6.0f},
             {100.0f, -5.0f, 6.0f, 7.0f}};
-        run_basic_push_copy_move(vals, std::size_t{4});
+        run_basic_push_copy_move(vals, usize{4});
     }
     {
         Vec4d vals[] = {
@@ -239,7 +239,7 @@ int main()
             {1.0, 2.0, 3.0, 4.0},
             {-3.0, 4.0, -5.0, 6.0},
             {100.0, -5.0, 6.0, 7.0}};
-        run_basic_push_copy_move(vals, std::size_t{4});
+        run_basic_push_copy_move(vals, usize{4});
     }
     {
         ColorRGB vals[] = {
@@ -247,7 +247,7 @@ int main()
             {255, 0, 0},
             {0, 255, 0},
             {0, 0, 255}};
-        run_basic_push_copy_move(vals, std::size_t{4});
+        run_basic_push_copy_move(vals, usize{4});
     }
     {
         ColorRGBA vals[] = {
@@ -256,7 +256,7 @@ int main()
             {0, 255, 0, 255},
             {0, 0, 255, 255},
             {128, 128, 128, 128}};
-        run_basic_push_copy_move(vals, std::size_t{5});
+        run_basic_push_copy_move(vals, usize{5});
     }
 
     run_emplace_tests();
