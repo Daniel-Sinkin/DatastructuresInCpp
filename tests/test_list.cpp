@@ -28,9 +28,9 @@ struct Vec3f
 struct ColorRGBA8
 {
     std::uint8_t r, g, b, a;
-    friend constexpr bool operator==(const ColorRGBA8 &a, const ColorRGBA8 &b)
+    friend constexpr bool operator==(const ColorRGBA8 &lhs, const ColorRGBA8 &rhs)
     {
-        return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
+        return lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b && lhs.a == rhs.a;
     }
 };
 
@@ -88,7 +88,10 @@ static void run_basic_tests(const T *vals, std::size_t n)
         d.push_back(vals[i]);
     const std::size_t d_len = d.get_length();
     const std::size_t d_cap = d.get_capacity();
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wself-assign-overloaded"
     d = d;
+#pragma clang diagnostic pop
     EXPECT_EQ(d.get_length(), d_len);
     EXPECT_EQ(d.get_capacity(), d_cap);
 }
