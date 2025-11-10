@@ -1,11 +1,20 @@
 # tests/CMakeLists.txt
 set(STRICT_WARNINGS
-  -Wall -Wextra -Wpedantic -Werror
-  -Wshadow -Wconversion -Wsign-conversion
-  -Wnull-dereference -Wdouble-promotion
-  -Wimplicit-fallthrough -Wold-style-cast
-  -Woverloaded-virtual -Wcast-align
-  -Wmissing-declarations -Wformat=2
+  -Wall
+  -Wextra
+  -Wpedantic
+  -Werror
+  -Wshadow
+  -Wconversion
+  -Wsign-conversion
+  -Wnull-dereference
+  -Wdouble-promotion
+  -Wimplicit-fallthrough
+  -Wold-style-cast
+  -Woverloaded-virtual
+  -Wcast-align
+  -Wmissing-declarations
+  -Wformat=2
 )
 
 add_executable(test_list test_list.cpp)

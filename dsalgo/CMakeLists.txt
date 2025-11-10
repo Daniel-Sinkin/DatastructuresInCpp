@@ -14,6 +14,7 @@ target_sources(DSAlgo PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/linked_list_double.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hashmap.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/util.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/primitives.hpp
 )
 
 target_include_directories(DSAlgo PUBLIC
@@ -25,16 +26,24 @@ target_compile_features(DSAlgo PUBLIC cxx_std_23)
 set_target_properties(DSAlgo PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 set(STRICT_WARNINGS
-  -Wall -Wextra -Wpedantic -Werror
-  -Wshadow -Wconversion -Wsign-conversion
-  -Wnull-dereference -Wdouble-promotion
-  -Wimplicit-fallthrough -Wold-style-cast
-  -Woverloaded-virtual -Wcast-align
-  -Wmissing-declarations -Wformat=2
+  -Wall
+  -Wextra
+  -Wpedantic
+  -Werror
+  -Wshadow
+  -Wconversion
+  -Wsign-conversion
+  -Wnull-dereference
+  -Wdouble-promotion
+  -Wimplicit-fallthrough
+  -Wold-style-cast
+  -Woverloaded-virtual
+  -Wcast-align
+  -Wmissing-declarations
+  -Wformat=2
 )
 target_compile_options(DSAlgo PRIVATE ${STRICT_WARNINGS})
 
-# Enable LTO in Release builds
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_ok)
 if(ipo_ok)

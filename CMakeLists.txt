@@ -16,12 +16,21 @@ add_executable(MyProgram main.cpp)
 target_link_libraries(MyProgram PRIVATE DSAlgo)
 
 set(STRICT_WARNINGS
-  -Wall -Wextra -Wpedantic -Werror
-  -Wshadow -Wconversion -Wsign-conversion
-  -Wnull-dereference -Wdouble-promotion
-  -Wimplicit-fallthrough -Wold-style-cast
-  -Woverloaded-virtual -Wcast-align
-  -Wmissing-declarations -Wformat=2
+  -Wall
+  -Wextra
+  -Wpedantic
+  -Werror
+  -Wshadow
+  -Wconversion
+  -Wsign-conversion
+  -Wnull-dereference
+  -Wdouble-promotion
+  -Wimplicit-fallthrough
+  -Wold-style-cast
+  -Woverloaded-virtual
+  -Wcast-align
+  -Wmissing-declarations
+  -Wformat=2
 )
 target_compile_options(MyProgram PRIVATE ${STRICT_WARNINGS})
 
