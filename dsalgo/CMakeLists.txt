@@ -9,7 +9,7 @@ target_sources(DSAlgo INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/array.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/linked_list_single.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/linked_list_double.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/hashmap.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hashmap_chained.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/util.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/types.hpp
 )

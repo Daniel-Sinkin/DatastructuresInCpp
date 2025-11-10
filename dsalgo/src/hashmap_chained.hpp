@@ -1,4 +1,4 @@
-// dsalgo/src/hashmap.hpp
+// dsalgo/src/hashmap_chained.hpp
 #pragma once
 #include "array.hpp"
 #include "list.hpp"

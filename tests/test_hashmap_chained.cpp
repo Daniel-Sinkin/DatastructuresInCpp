@@ -1,6 +1,6 @@
 // tests/test_hashmap.cpp
 #include "common.hpp"
-#include "hashmap.hpp"
+#include "hashmap_chained.hpp"
 #include <type_traits>
 
 namespace dsalgo::Test
