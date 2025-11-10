@@ -10,6 +10,7 @@ struct LinkedListDoubleNode
 class LinkedListDouble
 {
 public:
+    LinkedListDouble() : m_head(nullptr) {}
     LinkedListDouble(const LinkedListDouble &) = delete;
     LinkedListDouble &operator=(const LinkedListDouble &) = delete;
     LinkedListDouble(LinkedListDouble &&) noexcept = delete;

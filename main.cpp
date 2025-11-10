@@ -1,21 +1,3 @@
-struct LinkedListSingleNode
-{
-    double value;
-    LinkedListSingleNode *next;
-};
-
-class LinkedListSingle
-{
-public:
-    void push_front(double v);
-    void pop_front();
-    bool empty() const noexcept;
-    ~LinkedListSingle();
-
-private:
-    LinkedListSingleNode *m_head = nullptr;
-};
-
 int main()
 {
 }

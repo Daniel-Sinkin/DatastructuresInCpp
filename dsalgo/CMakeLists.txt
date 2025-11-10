@@ -2,6 +2,7 @@
 add_library(DSAlgo STATIC
     src/list.cpp
     src/linked_list_single.cpp
+    src/linked_list_double.cpp
 )
 
 target_sources(DSAlgo PUBLIC
@@ -10,6 +11,7 @@ target_sources(DSAlgo PUBLIC
     FILES
       ${CMAKE_CURRENT_SOURCE_DIR}/src/list.hpp
       ${CMAKE_CURRENT_SOURCE_DIR}/src/linked_list_single.hpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/linked_list_double.hpp
 )
 
 target_include_directories(DSAlgo PUBLIC
