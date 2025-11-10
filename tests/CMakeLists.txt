@@ -36,3 +36,13 @@ add_executable(test_hashmap test_hashmap.cpp)
 target_link_libraries(test_hashmap PRIVATE DSAlgo)
 target_compile_options(test_hashmap PRIVATE ${STRICT_WARNINGS})
 add_test(NAME test_hashmap COMMAND test_hashmap)
+
+add_executable(test_array test_array.cpp)
+target_link_libraries(test_array PRIVATE DSAlgo)
+target_compile_options(test_array PRIVATE ${STRICT_WARNINGS})
+add_test(NAME test_array COMMAND test_array)
+
+add_executable(test_util test_util.cpp)
+target_link_libraries(test_util PRIVATE DSAlgo)
+target_compile_options(test_util PRIVATE ${STRICT_WARNINGS})
+add_test(NAME test_util COMMAND test_util)

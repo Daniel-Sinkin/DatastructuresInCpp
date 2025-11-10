@@ -16,13 +16,10 @@ struct HashMapNode
 template <Hashable K, typename V, usize N>
 class HashMap
 {
-    static_assert(is_power_of_two(N), "Bucket count N must be a power of two");
-    static_assert(std::is_trivially_copyable_v<HashMapNode<K, V>>,
-        "K and V must be trivially copyable.");
-    using Node = HashMapNode<K, V>;
-    using Bucket = List<Node>;
-
 public:
+    using key_type = K;
+    using mapped_type = V;
+
     HashMap() = default;
 
     [[nodiscard]] usize key_to_idx(const K &key) const { return static_cast<usize>(hash_int(key)) & (N - 1); }
@@ -117,6 +114,12 @@ public:
     [[nodiscard]] double get_occupancy() const noexcept { return 1.0 - static_cast<double>(get_n_empty()) / static_cast<double>(N); }
 
 private:
+    static_assert(is_power_of_two(N), "Bucket count N must be a power of two");
+    static_assert(std::is_trivially_copyable_v<HashMapNode<K, V>>,
+        "K and V must be trivially copyable.");
+    using Node = HashMapNode<K, V>;
+    using Bucket = List<Node>;
+
     Array<Bucket, N> m_buckets;
 };
 } // namespace dsalgo
