@@ -3,6 +3,8 @@
 #include "linked_list_double.hpp"
 #include <cstddef>
 
+namespace dsalgo::Test
+{
 static std::size_t fwd_len(const LinkedListDoubleNode *h)
 {
     std::size_t n = 0;
@@ -164,8 +166,10 @@ static void test_forward_backward_lengths_small()
     check_links(s);
 }
 
+} // namespace dsalgo::Test
 int main()
 {
+    using namespace dsalgo::Test;
     test_empty_invariants();
     test_single_push_front_pop_front();
     test_single_push_back_pop_back();
@@ -174,4 +178,5 @@ int main()
     test_mixed_operations();
     test_clear();
     test_forward_backward_lengths_small();
+    return 0;
 }

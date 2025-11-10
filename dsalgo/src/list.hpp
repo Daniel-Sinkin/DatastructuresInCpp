@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <type_traits>
 
+namespace dsalgo
+{
 template <class T>
     requires std::is_trivially_copyable_v<T>
 class List
@@ -154,3 +156,4 @@ private:
     T *m_end{};
     T *m_capacity{};
 };
+}

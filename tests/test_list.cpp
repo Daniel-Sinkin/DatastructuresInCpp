@@ -7,6 +7,9 @@
 #include "list.hpp"
 #include "primitives.hpp"
 
+namespace dsalgo::Test
+{
+
 // Negative sanity: not trivially copyable -> List should be ill-formed for this.
 struct NonTrivial
 {
@@ -62,9 +65,10 @@ static void run_basic_tests(const T *vals, std::size_t n)
     EXPECT_EQ(d.get_length(), d_len);
     EXPECT_EQ(d.get_capacity(), d_cap);
 }
-
+} // namespace dsalgo::Test
 int main()
 {
+    using namespace dsalgo::Test;
     {
         float vals[] = {0.0f, 1.5f, -2.25f, 100.0f, 3.25f};
         run_basic_tests(vals, std::size_t{5});

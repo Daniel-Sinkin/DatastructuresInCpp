@@ -3,6 +3,8 @@
 #include "linked_list_single.hpp"
 #include <cstddef>
 
+namespace dsalgo::Test
+{
 static void test_empty_pop_idempotent()
 {
     LinkedListSingle s;
@@ -73,12 +75,16 @@ static void test_destructor_smoke()
     }
 }
 
+} // namespace dsalgo::Test
+
 int main()
 {
+    using namespace dsalgo::Test;
     test_empty_pop_idempotent();
     test_single_push_pop();
     test_multi_push_then_pop_all();
     test_alternating_push_pop();
     test_stress_large_n();
     test_destructor_smoke();
+    return 0;
 }

@@ -3,6 +3,10 @@
 #include <cstdint>
 #include <type_traits>
 
+#include "types.hpp"
+
+namespace dsalgo
+{
 struct alignas(16) Vec3f
 {
     float x, y, z;
@@ -41,7 +45,7 @@ struct alignas(16) Vec4d
 
 struct alignas(4) ColorRGB
 {
-    std::uint8_t r, g, b;
+    u8 r, g, b;
     friend constexpr bool operator==(const ColorRGB &lhs, const ColorRGB &rhs) noexcept
     {
         return lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b;
@@ -50,7 +54,7 @@ struct alignas(4) ColorRGB
 
 struct alignas(4) ColorRGBA
 {
-    std::uint8_t r, g, b, a;
+    u8 r, g, b, a;
     friend constexpr bool operator==(const ColorRGBA &lhs, const ColorRGBA &rhs) noexcept
     {
         return lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b && lhs.a == rhs.a;
@@ -61,3 +65,4 @@ static_assert(std::is_trivially_copyable_v<Vec3f>);
 static_assert(std::is_trivially_copyable_v<Vec4f>);
 static_assert(std::is_trivially_copyable_v<ColorRGB>);
 static_assert(std::is_trivially_copyable_v<ColorRGBA>);
+}

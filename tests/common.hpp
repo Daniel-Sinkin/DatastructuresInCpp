@@ -3,6 +3,9 @@
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
+namespace dsalgo::Test
+{
+using namespace dsalgo;
 
 inline void expect(bool ok, const char *msg)
 {
@@ -64,3 +67,4 @@ inline void expect_exception(F &&fn, const char *msg)
             throw std::runtime_error("EXPECT_NO_THROW: " #expr); \
         }                                                        \
     } while (0)
+} // namespace dsalgo::Test
