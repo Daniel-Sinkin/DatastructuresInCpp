@@ -1,6 +1,5 @@
 # DSAlgo/CMakeLists
 add_library(DSAlgo STATIC
-    src/list.cpp
     src/linked_list_single.cpp
     src/linked_list_double.cpp
     src/hashmap.cpp
