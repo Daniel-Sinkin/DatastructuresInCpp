@@ -16,10 +16,10 @@ template <class T>
 class List
 {
 public:
+    List() = default;
     explicit List(std::size_t n_elements)
     {
-        if (n_elements == 0) return;
-        allocate_(n_elements);
+        if (n_elements > 0) allocate_(n_elements);
     }
 
     List(List &&other) noexcept
@@ -128,18 +128,14 @@ public:
 
     [[nodiscard]] T &operator[](std::size_t index) noexcept { return m_start[index]; }
     [[nodiscard]] const T &operator[](std::size_t index) const noexcept { return m_start[index]; }
-
     [[nodiscard]] T &at(std::size_t index)
     {
-        if (index >= get_length())
-            throw std::out_of_range("List::at index out of range");
+        if (index >= get_length()) throw std::out_of_range("List::at index out of range");
         return m_start[index];
     }
-
     [[nodiscard]] const T &at(std::size_t index) const
     {
-        if (index >= get_length())
-            throw std::out_of_range("List::at index out of range");
+        if (index >= get_length()) throw std::out_of_range("List::at index out of range");
         return m_start[index];
     }
 
