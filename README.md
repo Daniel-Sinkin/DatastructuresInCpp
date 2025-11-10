@@ -20,3 +20,6 @@ cmake --build build -j8
 ```bash
 ctest --test-dir build --output-on-failure -j8
 ```
+
+# References
+* https://github.com/g-truc/glm

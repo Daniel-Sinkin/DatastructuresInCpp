@@ -1,7 +1,6 @@
 // tests/test_array.cpp
 #include "array.hpp"
 #include "common.hpp"
-#include "primitives.hpp"
 #include <type_traits>
 
 namespace dsalgo::Test

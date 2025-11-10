@@ -10,10 +10,27 @@ if(CCACHE_PROGRAM)
   set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
 endif()
 
+include(FetchContent)
+set(FETCHCONTENT_BASE_DIR "${CMAKE_SOURCE_DIR}/.deps")
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
+FetchContent_Declare(
+  glm
+  GIT_REPOSITORY https://github.com/g-truc/glm.git
+  GIT_TAG        1.0.1
+  GIT_SHALLOW    TRUE    
+)
+FetchContent_MakeAvailable(glm)
+FetchContent_GetProperties(glm)
+if (glm_SOURCE_DIR)
+  set_property(DIRECTORY ${glm_SOURCE_DIR} PROPERTY CMAKE_SUPPRESS_DEVELOPER_WARNINGS TRUE)
+  set_property(DIRECTORY ${glm_SOURCE_DIR} PROPERTY CMAKE_WARN_DEPRECATED OFF)
+endif()
+set(FETCHCONTENT_QUIET TRUE)
+
 add_subdirectory(dsalgo)
 
 add_executable(MyProgram main.cpp)
-target_link_libraries(MyProgram PRIVATE DSAlgo)
+target_link_libraries(MyProgram PRIVATE DSAlgo glm::glm)
 
 set(STRICT_WARNINGS
   -Wall

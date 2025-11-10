@@ -6,10 +6,28 @@
 
 #include "common.hpp"
 #include "list.hpp"
-#include "primitives.hpp"
+
+// NEW: GLM
+#include <glm/glm.hpp>
 
 namespace dsalgo::Test
 {
+struct ColorRGB
+{
+    u8 r, g, b;
+    friend constexpr bool operator==(const ColorRGB &lhs, const ColorRGB &rhs) noexcept
+    {
+        return lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b;
+    }
+};
+struct ColorRGBA
+{
+    u8 r, g, b, a;
+    friend constexpr bool operator==(const ColorRGBA &lhs, const ColorRGBA &rhs) noexcept
+    {
+        return lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b && lhs.a == rhs.a;
+    }
+};
 
 struct NonTrivial
 {

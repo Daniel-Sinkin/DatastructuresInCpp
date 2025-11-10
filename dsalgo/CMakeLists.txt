@@ -6,11 +6,11 @@ target_sources(DSAlgo INTERFACE
   BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
   FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/list.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/array.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/linked_list_single.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/linked_list_double.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hashmap.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/util.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/primitives.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/types.hpp
 )
 
@@ -40,6 +40,11 @@ set(STRICT_WARNINGS
   -Wformat=2
 )
 target_compile_options(DSAlgo INTERFACE ${STRICT_WARNINGS})
+
+target_link_libraries(DSAlgo INTERFACE glm::glm)
+target_include_directories(DSAlgo SYSTEM INTERFACE
+  $<TARGET_PROPERTY:glm::glm,INTERFACE_INCLUDE_DIRECTORIES>
+)
 
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_ok)

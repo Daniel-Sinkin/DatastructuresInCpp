@@ -18,7 +18,7 @@ set(STRICT_WARNINGS
 )
 
 add_executable(test_list test_list.cpp)
-target_link_libraries(test_list PRIVATE DSAlgo)
+target_link_libraries(test_list PRIVATE DSAlgo glm::glm)
 target_compile_options(test_list PRIVATE ${STRICT_WARNINGS})
 add_test(NAME test_list COMMAND test_list)
 
