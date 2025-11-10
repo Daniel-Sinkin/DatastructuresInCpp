@@ -8,7 +8,7 @@ namespace dsalgo::Test
 
 static void test_sizes_and_iter_int()
 {
-    Array<int, 8> a;
+    Array<int, 8> a{};
     EXPECT_EQ(a.get_size_static(), 8zu);
     EXPECT_EQ(a.get_size(), 8zu);
 
@@ -29,7 +29,7 @@ static void test_sizes_and_iter_int()
 
 static void test_fill_and_raw_vec()
 {
-    Array<Vec3f, 4> a;
+    Array<Vec3f, 4> a{};
     Vec3f c{1.0f, 2.0f, 3.0f};
     a.fill(c);
     for (usize i = 0zu; i < a.get_size(); ++i)
@@ -50,7 +50,7 @@ static void test_fill_and_raw_vec()
 
 static void test_mutation_through_iteration()
 {
-    Array<u32, 5> a;
+    Array<u32, 5> a{};
     a.fill(7u);
     usize i = 0zu;
     for (auto &v : a)

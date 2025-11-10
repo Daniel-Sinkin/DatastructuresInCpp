@@ -8,19 +8,19 @@
 namespace dsalgo
 {
 template <Hashable K, typename V>
-struct HashMapNode
+struct HashMapChainedNode
 {
     K key;
     V value;
 };
 template <Hashable K, typename V, usize N>
-class HashMap
+class HashMapChained
 {
 public:
     using key_type = K;
     using mapped_type = V;
 
-    HashMap() = default;
+    HashMapChained() = default;
 
     [[nodiscard]] usize key_to_idx(const K &key) const { return static_cast<usize>(hash_int(key)) & (N - 1); }
 
@@ -115,9 +115,9 @@ public:
 
 private:
     static_assert(is_power_of_two(N), "Bucket count N must be a power of two");
-    static_assert(std::is_trivially_copyable_v<HashMapNode<K, V>>,
+    static_assert(std::is_trivially_copyable_v<HashMapChainedNode<K, V>>,
         "K and V must be trivially copyable.");
-    using Node = HashMapNode<K, V>;
+    using Node = HashMapChainedNode<K, V>;
     using Bucket = List<Node>;
 
     Array<Bucket, N> m_buckets;

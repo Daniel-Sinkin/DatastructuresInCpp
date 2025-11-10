@@ -8,6 +8,12 @@ template <class T, usize N>
 class Array
 {
 public:
+    constexpr Array() = default; // restore this
+    constexpr explicit Array(const T &value)
+    {
+        fill(value);
+    }
+
     [[nodiscard]] static constexpr usize get_size_static() noexcept { return N; }
     [[nodiscard]] constexpr usize get_size() const noexcept { return N; }
 

@@ -28,7 +28,7 @@ static void test_basic_insert_find_overwrite_clear()
     using K = u32;
     using V = u64;
     constexpr usize N = 16zu;
-    dsalgo::HashMap<K, V, N> m;
+    dsalgo::HashMapChained<K, V, N> m;
 
     // API sanity
     EXPECT_EQ(m.get_bucket_count(), N);
@@ -70,7 +70,7 @@ static void test_all_keys_same_bucket_via_N_eq_1()
     using K = u64;
     using V = u32;
     constexpr usize N = 1zu;
-    dsalgo::HashMap<K, V, N> m;
+    dsalgo::HashMapChained<K, V, N> m;
 
     // Every key maps to bucket 0. Exercise linear scan paths.
     for (K k = 10u; k < 20u; ++k)
@@ -108,7 +108,7 @@ static void test_key_to_idx_bounds_and_occupancy()
     using K = usize;
     using V = usize;
     constexpr usize N = 8zu;
-    dsalgo::HashMap<K, V, N> m;
+    dsalgo::HashMapChained<K, V, N> m;
 
     // key_to_idx must map into [0, N-1]
     for (K k = 0zu; k < 100zu; ++k)
