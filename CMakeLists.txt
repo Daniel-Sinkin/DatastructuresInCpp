@@ -47,14 +47,13 @@ set(STRICT_WARNINGS
   -Wold-style-cast
   -Woverloaded-virtual
   -Wcast-align
-  -Wmissing-declarations
   -Wformat=2
 )
 
 target_compile_options(project_warnings INTERFACE ${STRICT_WARNINGS})
 
 include(FetchContent)
-set(FETCHCONTENT_BASE_DIR "${CMAKE_SOURCE_DIR}/.deps")
+set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}/_deps")
 set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
 set(FETCHCONTENT_QUIET TRUE)
 
@@ -81,3 +80,5 @@ include(CTest)
 if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
+
+add_subdirectory(examples)

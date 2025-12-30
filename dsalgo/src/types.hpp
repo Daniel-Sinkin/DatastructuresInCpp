@@ -25,7 +25,7 @@ using f32 = float;
 using f64 = double;
 #endif
 
-using usize = std::size_t;
+using usize = size_t;
 using isize = std::ptrdiff_t;
 
 inline constexpr bool use_f64 = true;

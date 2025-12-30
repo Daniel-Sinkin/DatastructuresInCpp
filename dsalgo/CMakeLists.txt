@@ -17,16 +17,14 @@ target_include_directories(DSAlgo INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
   $<INSTALL_INTERFACE:include>
 )
+target_include_directories(DSAlgo INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-# Inherit C++ standard from top-level, but enforce at interface boundary:
 target_compile_features(DSAlgo INTERFACE cxx_std_23)
 
 set_target_properties(DSAlgo PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-# Link deps + warnings
 target_link_libraries(DSAlgo INTERFACE glm::glm project_warnings)
 
-# Make glm headers "SYSTEM" to reduce third-party warnings
 target_include_directories(DSAlgo SYSTEM INTERFACE
   $<TARGET_PROPERTY:glm::glm,INTERFACE_INCLUDE_DIRECTORIES>
 )

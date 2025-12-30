@@ -3,7 +3,8 @@
 # Release build
 ```bash
 rm -rf build
-cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=Release \
+cmake -G Ninja -S . -B build \
+  -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++
 cmake --build build -j8
 ```
@@ -11,7 +12,8 @@ cmake --build build -j8
 # Debug build
 ```bash
 rm -rf build
-cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=Debug \
+cmake -G Ninja -S . -B build \
+  -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++
 cmake --build build -j8
 ```
