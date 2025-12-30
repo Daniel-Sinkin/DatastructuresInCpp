@@ -1,4 +1,3 @@
-# DSAlgo/CMakeLists
 add_library(DSAlgo INTERFACE)
 
 target_sources(DSAlgo INTERFACE
@@ -19,29 +18,15 @@ target_include_directories(DSAlgo INTERFACE
   $<INSTALL_INTERFACE:include>
 )
 
+# Inherit C++ standard from top-level, but enforce at interface boundary:
 target_compile_features(DSAlgo INTERFACE cxx_std_23)
+
 set_target_properties(DSAlgo PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-set(STRICT_WARNINGS
-  -Wall
-  -Wextra
-  -Wpedantic
-  -Werror
-  -Wshadow
-  -Wconversion
-  -Wsign-conversion
-  -Wnull-dereference
-  -Wdouble-promotion
-  -Wimplicit-fallthrough
-  -Wold-style-cast
-  -Woverloaded-virtual
-  -Wcast-align
-  -Wmissing-declarations
-  -Wformat=2
-)
-target_compile_options(DSAlgo INTERFACE ${STRICT_WARNINGS})
+# Link deps + warnings
+target_link_libraries(DSAlgo INTERFACE glm::glm project_warnings)
 
-target_link_libraries(DSAlgo INTERFACE glm::glm)
+# Make glm headers "SYSTEM" to reduce third-party warnings
 target_include_directories(DSAlgo SYSTEM INTERFACE
   $<TARGET_PROPERTY:glm::glm,INTERFACE_INCLUDE_DIRECTORIES>
 )
