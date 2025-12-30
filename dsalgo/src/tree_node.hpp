@@ -7,6 +7,8 @@
 #include <utility>
 #include <vector>
 
+namespace dsalgo{
+
 template <typename T>
 struct TreeNode
 {
@@ -82,3 +84,4 @@ private:
         return out;
     }
 };
+}

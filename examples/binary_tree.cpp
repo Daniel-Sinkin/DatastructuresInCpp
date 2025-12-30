@@ -4,6 +4,7 @@
 
 int main()
 {
+    using namespace dsalgo;
     BinaryTreeNode<int> r{10};
     r.set_left(5);
     r.set_right(15);

@@ -4,6 +4,7 @@
 
 int main()
 {
+    using namespace dsalgo;
     TreeNode<int> g{0};
     g.create_new_child(1);
     g.create_new_child(2);

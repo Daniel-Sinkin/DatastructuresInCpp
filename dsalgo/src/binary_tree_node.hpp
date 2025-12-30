@@ -7,6 +7,7 @@
 #include <string_view>
 #include <utility>
 
+namespace dsalgo {
 template <typename T>
 struct BinaryTreeNode
 {
@@ -95,3 +96,4 @@ private:
         return out;
     }
 };
+}
