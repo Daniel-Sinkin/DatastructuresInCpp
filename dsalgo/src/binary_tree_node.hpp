@@ -36,7 +36,7 @@ private:
     std::unique_ptr<BinaryTreeNode> m_left = nullptr;
     std::unique_ptr<BinaryTreeNode> m_right = nullptr;
 };
-}
+} // dsalgo
 
 template <typename T>
 struct std::formatter<dsalgo::BinaryTreeNode<T>>
@@ -50,7 +50,7 @@ struct std::formatter<dsalgo::BinaryTreeNode<T>>
         return it;
     }
 
-    auto format(const BinaryTreeNode<T>& node, std::format_context& ctx) const
+    auto format(const dsalgo::BinaryTreeNode<T>& node, std::format_context& ctx) const
     {
         auto out = ctx.out();
         out = std::format_to(out, "root: {}\n", node.m_value);
@@ -68,7 +68,7 @@ struct std::formatter<dsalgo::BinaryTreeNode<T>>
 
 private:
     static auto format_child(
-        const BinaryTreeNode<T>& node,
+        const dsalgo::BinaryTreeNode<T>& node,
         std::format_context::iterator out,
         const std::string& prefix,
         std::string_view label,

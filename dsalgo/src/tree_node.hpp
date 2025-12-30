@@ -19,8 +19,8 @@ struct TreeNode
         m_children.emplace_back(std::make_unique<TreeNode>(std::move(value)));
     }
 
-    [[nodiscard]] TreeNode* child_ptr(size_t idx) noexcept { return m_children.at(idx).get(); }
-    [[nodiscard]] const TreeNode* child_ptr(size_t idx) const noexcept { return m_children.at(idx).get(); }
+    [[nodiscard]] TreeNode* child_ptr(size_t idx) { return m_children.at(idx).get(); }
+    [[nodiscard]] const TreeNode* child_ptr(size_t idx) const { return m_children.at(idx).get(); }
 
     [[nodiscard]] const T& value() const noexcept { return m_value; }
     [[nodiscard]] size_t child_count() const noexcept { return m_children.size(); }
@@ -30,7 +30,7 @@ private:
     T m_value;
     std::vector<std::unique_ptr<TreeNode>> m_children;
 };
-}
+} // dsalgo
 
 template <typename T>
 struct std::formatter<dsalgo::TreeNode<T>>
@@ -44,7 +44,7 @@ struct std::formatter<dsalgo::TreeNode<T>>
         return it;
     }
 
-    auto format(const TreeNode<T>& node, std::format_context& ctx) const
+    auto format(const dsalgo::TreeNode<T>& node, std::format_context& ctx) const
     {
         auto out = ctx.out();
         out = std::format_to(out, "root: {}\n", node.value());
@@ -59,7 +59,7 @@ struct std::formatter<dsalgo::TreeNode<T>>
 
 private:
     static auto format_child(
-        const TreeNode<T>& node,
+        const dsalgo::TreeNode<T>& node,
         std::format_context::iterator out,
         const std::string& prefix,
         size_t idx,
