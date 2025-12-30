@@ -30,9 +30,10 @@ private:
     T m_value;
     std::vector<std::unique_ptr<TreeNode>> m_children;
 };
+}
 
 template <typename T>
-struct std::formatter<TreeNode<T>>
+struct std::formatter<dsalgo::TreeNode<T>>
 {
     constexpr auto parse(std::format_parse_context& ctx)
     {
@@ -84,4 +85,3 @@ private:
         return out;
     }
 };
-}

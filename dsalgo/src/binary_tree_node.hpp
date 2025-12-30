@@ -36,9 +36,10 @@ private:
     std::unique_ptr<BinaryTreeNode> m_left = nullptr;
     std::unique_ptr<BinaryTreeNode> m_right = nullptr;
 };
+}
 
 template <typename T>
-struct std::formatter<BinaryTreeNode<T>>
+struct std::formatter<dsalgo::BinaryTreeNode<T>>
 {
     constexpr auto parse(std::format_parse_context& ctx)
     {
@@ -96,4 +97,3 @@ private:
         return out;
     }
 };
-}
