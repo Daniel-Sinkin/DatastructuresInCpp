@@ -36,7 +36,7 @@ private:
     std::unique_ptr<BinaryTreeNode> m_left = nullptr;
     std::unique_ptr<BinaryTreeNode> m_right = nullptr;
 };
-} // dsalgo
+} // namespace dsalgo
 
 template <typename T>
 struct std::formatter<dsalgo::BinaryTreeNode<T>>

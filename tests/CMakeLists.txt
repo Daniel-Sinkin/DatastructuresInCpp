@@ -1,15 +1,15 @@
+# tests/CMakeLists.txt
 function(add_ds_test name)
   add_executable(${name} ${name}.cpp)
   target_link_libraries(${name} PRIVATE DSAlgo project_warnings)
   add_test(NAME ${name} COMMAND ${name})
 endfunction()
 
-add_ds_test(test_list)
-add_ds_test(test_linked_list_single)
-add_ds_test(test_linked_list_double)
-add_ds_test(test_hashmap_chained)
-add_ds_test(test_hashmap_oa)
-add_ds_test(test_array)
-add_ds_test(test_util)
-add_ds_test(test_tree_node)
-add_ds_test(test_binary_tree_node)
+file(GLOB TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
+
+foreach(src ${TEST_SOURCES})
+  get_filename_component(name "${src}" NAME_WE) # e.g. test_array
+  add_executable(${name} "${src}")
+  target_link_libraries(${name} PRIVATE DSAlgo project_warnings)
+  add_test(NAME ${name} COMMAND ${name})
+endforeach()

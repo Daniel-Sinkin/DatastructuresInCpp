@@ -30,7 +30,7 @@ private:
     T m_value;
     std::vector<std::unique_ptr<TreeNode>> m_children;
 };
-} // dsalgo
+} // namespace dsalgo
 
 template <typename T>
 struct std::formatter<dsalgo::TreeNode<T>>
