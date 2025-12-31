@@ -48,6 +48,8 @@ set(STRICT_WARNINGS
   -Wold-style-cast
   -Woverloaded-virtual
   -Wcast-align
+  -Wfloat-equal
+  -Wswitch-enum
   -Wformat=2
 )
 

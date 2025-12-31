@@ -2,9 +2,11 @@
 #pragma once
 #include "types.hpp"
 
+#include <cmath>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
+
 namespace dsalgo::Test
 {
 using namespace dsalgo;
@@ -30,6 +32,15 @@ inline void expect_exception(F &&fn, const char *msg)
     if (!thrown) throw std::runtime_error(msg);
 }
 
+template <typename T>
+constexpr bool nearly_equal(T a, T b, T rel_eps, T abs_eps) noexcept
+{
+    static_assert(std::is_floating_point_v<T>);
+    const T diff = std::abs(a - b);
+    if (diff <= abs_eps) return true;
+    return diff <= rel_eps * std::max(std::abs(a), std::abs(b));
+}
+
 #define EXPECT_TRUE(expr)                                             \
     do                                                                \
     {                                                                 \
@@ -40,6 +51,22 @@ inline void expect_exception(F &&fn, const char *msg)
     do                                                                           \
     {                                                                            \
         if (!((a) == (b))) throw std::runtime_error("EXPECT_EQ: " #a " == " #b); \
+    } while (0)
+
+/* Float comparison (absolute + relative tolerance) */
+#define EXPECT_NEAR(a, b)                                                            \
+    do                                                                               \
+    {                                                                                \
+        using _T = std::decay_t<decltype(a)>;                                        \
+        static_assert(std::is_floating_point_v<_T>, "EXPECT_NEAR requires floats"); \
+        if (!::dsalgo::Test::nearly_equal(                                           \
+                static_cast<_T>(a),                                                  \
+                static_cast<_T>(b),                                                  \
+                static_cast<_T>(1e-6),                                               \
+                static_cast<_T>(1e-12)))                                             \
+        {                                                                            \
+            throw std::runtime_error("EXPECT_NEAR: " #a " ~= " #b);                  \
+        }                                                                            \
     } while (0)
 
 #define EXPECT_THROW(expr)                                         \
@@ -69,4 +96,5 @@ inline void expect_exception(F &&fn, const char *msg)
             throw std::runtime_error("EXPECT_NO_THROW: " #expr); \
         }                                                        \
     } while (0)
+
 } // namespace dsalgo::Test

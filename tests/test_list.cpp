@@ -45,7 +45,12 @@ static void check_sequence_eq(const List<T> &lst, const T *vals, usize n)
     {
         T got = copy.pop_back_return();
         const T &expect = vals[n - 1 - i];
-        EXPECT_TRUE(got == expect);
+
+        if constexpr (std::is_floating_point_v<T>) {
+            EXPECT_NEAR(got, expect);
+        } else {
+            EXPECT_TRUE(got == expect);
+        }
     }
     EXPECT_TRUE(copy.is_empty());
 }

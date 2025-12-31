@@ -219,7 +219,7 @@ static void test_overwrite_keeps_occupancy()
     EXPECT_TRUE(!m.insert(123, 2)); // overwrite
     EXPECT_TRUE(m.find(123) && *m.find(123) == 2);
     const double occ_after = m.get_occupancy();
-    EXPECT_TRUE(occ_before == occ_after);
+    EXPECT_NEAR(occ_before, occ_after);
 }
 
 } // namespace dsalgo::Test
