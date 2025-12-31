@@ -22,7 +22,10 @@ public:
 
     HashMapChained() = default;
 
-    [[nodiscard]] usize key_to_idx(const K &key) const { return static_cast<usize>(hash_int(key)) & (N - 1); }
+    [[nodiscard]] usize key_to_idx(const K &key) const
+    {
+        return static_cast<usize>(hash_int(key)) & (N - 1);
+    }
 
     bool insert(const K &key, const V &value)
     {

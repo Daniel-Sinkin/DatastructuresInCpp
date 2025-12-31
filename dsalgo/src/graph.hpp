@@ -6,6 +6,7 @@
 #include <span>
 #include <utility>
 #include <vector>
+#include <optional>
 
 #include "types.hpp"
 
@@ -26,6 +27,10 @@ public:
     GraphIndex get_idx() const noexcept { return m_idx; }
 
     std::span<const GraphIndex> neighbors() const noexcept { return m_neighbors; }
+
+    bool contains_edge(GraphIndex idx) const noexcept {
+        return std::ranges::binary_search(m_neighbors, idx);
+    }
 
     enum class AddNeighborError
     {
@@ -85,6 +90,48 @@ template <typename T>
 class Graph
 {
 public:
+    const T* value_by_idx(GraphIndex idx) const noexcept {
+        auto it = m_nodes.find(idx);
+        if (it == m_nodes.end()) return nullptr;
+        return &it->second->value();
+    }
+
+    
+    enum class AddEdgeError
+    {
+        NodeFromMissing,
+        NodeToMissing,
+        EdgeExists,
+        SelfLoop,
+    };
+    [[nodiscard]]
+    std::expected<void, AddEdgeError>
+    add_edge(GraphIndex idx0, GraphIndex idx1) {
+        using E = AddEdgeError;
+
+        if(idx0 == idx1) return std::unexpected(E::SelfLoop);
+
+        auto it0 = m_nodes.find(idx0);
+        if (it0 == m_nodes.end()) return std::unexpected(E::NodeFromMissing);
+        GraphNode<T>& node0 = *it0->second;
+
+        if(!m_nodes.contains(idx1)) return std::unexpected(E::NodeToMissing);
+
+        auto res = node0.add_neighbor(idx1);
+        if(!res) {
+            using EE = GraphNode<T>::AddNeighborError;
+            switch(res.error()) {
+                case EE::SelfLoop:
+                    assert(false && "Graph::add_edge prechecked idx0==idx1 but node reported SelfLoop");
+                    return std::unexpected(E::SelfLoop);
+                case EE::DuplicateNeighbor:
+                    return std::unexpected(E::EdgeExists);
+            }
+        }
+        return {};
+    }
+
+
     enum class CreateNodeError
     {
         IndexExists,
@@ -182,7 +229,6 @@ private:
 
         return static_cast<GraphIndex>(max_idx + 1);
     }
-
     std::unordered_map<GraphIndex, std::unique_ptr<GraphNode<T>>> m_nodes;
 };
 } // namespace dsalgo

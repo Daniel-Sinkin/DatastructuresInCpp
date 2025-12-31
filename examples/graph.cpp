@@ -26,10 +26,10 @@ int main() {
     }
 
     auto add_edge = [](GraphNode<int>* from, GraphIndex to) -> bool {
-        auto r = from->add_neighbor(to);
+        auto r = from->add_edge(to);
         if (!r) {
             std::println(
-                "add_neighbor(from={}, to={}) failed: {}",
+                "add_edge(from={}, to={}) failed: {}",
                 from->get_idx(),
                 to,
                 static_cast<int>(r.error())
