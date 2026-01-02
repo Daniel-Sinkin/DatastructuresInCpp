@@ -26,7 +26,7 @@ int main() {
     }
 
     auto add_edge = [](GraphNode<int>* from, GraphIndex to) -> bool {
-        auto r = from->add_edge(to);
+        auto r = from->add_neighbor(to);
         if (!r) {
             std::println(
                 "add_edge(from={}, to={}) failed: {}",
