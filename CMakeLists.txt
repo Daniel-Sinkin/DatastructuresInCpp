@@ -76,8 +76,8 @@ endif()
 
 add_subdirectory(dsalgo)
 
-add_executable(MyProgram main.cpp)
-target_link_libraries(MyProgram PRIVATE DSAlgo glm::glm project_warnings)
+add_executable(main main.cpp)
+target_link_libraries(main PRIVATE DSAlgo glm::glm project_warnings)
 
 include(CTest)
 if(BUILD_TESTING)
