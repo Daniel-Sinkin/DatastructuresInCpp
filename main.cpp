@@ -1,13 +1,15 @@
 // main.cpp
 
-#include <cassert>     // IWYU pragma: keep
-#include <cstddef>     // IWYU pragma: keep
-#include <cstdint>     // IWYU pragma: keep
-#include <cstdlib>     // IWYU pragma: keep
-#include <exception>   // IWYU pragma: keep
-#include <functional>  // IWYU pragma: keep
-#include <iterator>    // IWYU pragma: keep
-#include <limits>      // IWYU pragma: keep
+#include <cassert>    // IWYU pragma: keep
+#include <cstddef>    // IWYU pragma: keep
+#include <cstdint>    // IWYU pragma: keep
+#include <cstdlib>    // IWYU pragma: keep
+#include <exception>  // IWYU pragma: keep
+#include <functional> // IWYU pragma: keep
+#include <iostream>
+#include <iterator> // IWYU pragma: keep
+#include <limits>   // IWYU pragma: keep
+#include <locale>
 #include <map>         // IWYU pragma: keep
 #include <print>       // IWYU pragma: keep
 #include <random>      // IWYU pragma: keep
@@ -40,11 +42,70 @@ using MatrixI32 = std::vector<std::vector<i32>>;
 
 using Matrix = MatrixI32;
 
-auto print(const Matrix &matrix) {
-    for (const auto &row : matrix) {
-        std::println("{}", row);
+struct StackEntry {
+    int value{};
+    bool is_removed{false};
+};
+
+class BRStack {
+public:
+    auto push(int value) -> void {
+        const usize idx = data_.size();
+        data_.push_back({value, false});
+        value_to_idx_[value].push_back(idx);
     }
-}
+
+    auto pop() -> void {
+        while (!data_.empty()) {
+            const auto top = data_.back();
+
+            const auto entry = data_.back();
+            data_.pop_back();
+            value_to_idx_[entry.value].pop_back();
+
+            if (!top.is_removed) {
+                // break on first alive object deleted
+                break;
+            }
+        }
+    }
+
+    auto remove_lower(int value) -> void {
+        auto it = value_to_idx_.begin();
+        const auto end = value_to_idx_.lower_bound(value);
+        while (it != end) {
+            for (auto idx : it->second) {
+                data_[idx].is_removed = true;
+            }
+            ++it;
+        }
+    }
+
+    auto remove_upper(int value) -> void {
+        auto it = value_to_idx_.upper_bound(value);
+        while (it != value_to_idx_.end()) {
+            for (auto &idx : it->second) {
+                std::println("remove_upper inner");
+                data_[idx].is_removed = true;
+            }
+            ++it;
+        }
+    }
+
+    auto print() const -> void {
+        for (auto i = data_.size(); i-- > 0;) {
+            const auto entry = data_[i];
+            if (!entry.is_removed) {
+                std::println("<{:3}>", entry.value);
+            }
+        }
+    }
+
+private:
+    std::vector<StackEntry> data_{};
+    std::map<int, std::vector<usize>> value_to_idx_{};
+};
 
 int main() {
+    BRStack stack{};
 }
