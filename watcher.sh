@@ -1,1 +1,1 @@
-watchexec -q -w main.cpp "cmake --build build && clear && ./build/main"
+watchexec -q -w main.cpp "cmake --build build && clear && ./build/main < input.csv"

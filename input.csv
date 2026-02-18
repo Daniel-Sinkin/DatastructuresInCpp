@@ -1,0 +1,9 @@
+timestamp,server_id,request_type,duration_ms,status_code
+1000,srv-01,GET,45,200
+1003,srv-02,POST,120,500
+1005,srv-01,GET,30,200
+1007,srv-03,POST,200,200
+1010,srv-02,GET,15,200
+1012,srv-01,POST,500,500
+1015,srv-03,GET,25,200
+1018,srv-02,POST,80,200
