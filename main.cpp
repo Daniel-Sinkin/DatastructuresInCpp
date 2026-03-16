@@ -1,150 +1,87 @@
 // main.cpp
-
 /*
-Implement a templated Vector<T> with:
+Implement a templated SharedPtr<T> with:
 
-Default constructor, destructor
-push_back(const T&) and push_back(T&&)
-emplace_back(Args&&...)
-x operator[]
-x size(), capacity()
-Move constructor and move assignment
-Amortized doubling with placement new and manual destroy
-No std::vector usage
+x Control block containing std::atomic<int> strong reference count
+x Constructor from raw pointer SharedPtr(T* ptr)
+x Destructor (decrements count, deletes when zero)
+x Copy constructor and copy assignment (increment count)
+x Move constructor and move assignment (transfer ownership, no count change)
+x operator*, operator->, get()
+x use_count() -> int
+x Default constructor (null state)
+x reset() to release ownership
+
+Don't implement WeakPtr or custom deleters. Focus on getting the reference counting and copy/move semantics right.
 */
 
-//           v-- cap
-//        v-- end
-//  v-- start
-// [1, 2, *, *] -push_back(3)-> [1, 2, 3, *]
-//              -push_back(4)-> [1, 2, 3, 4]
-//              -push_back(5)-> [1, 2, 3, 4, 5, *, *, *]
-// [1, 2, *, *] -shrink_to_fit()-> [1, 2]
+#include <atomic>
+#include <memory>
 
-// size(vs) == end - start
-// capacity(vs) == cap - start
-// empty(vs) == (start == end)
-
-#include <algorithm>
-#include <cstddef>
-#include <stdexcept>
-#include <type_traits>
-#include <utility>
-
-using usize = std::size_t;
-
-template <typename T>
-    requires(std::is_nothrow_move_constructible_v<T>)
-class Vector {
+template <typename T, typename Deleter = std::default_delete<T>>
+class SharedPtr {
 public:
-    using SizeT = usize;
-
-    Vector() = default;
-    ~Vector() {
-        for (auto p = start_; p != end_; ++p) {
-            p->~T();
-        }
-        ::operator delete(start_);
+    SharedPtr() : ptr_(nullptr), ctrl_(nullptr) {}
+    SharedPtr(T *ptr) : ptr_(ptr), ctrl_(new ControlBlock{1, 0, Deleter{}}) {}
+    ~SharedPtr() { reset(); }
+    SharedPtr(const SharedPtr &other) {
+        copy_from_(other);
     }
-
-    Vector(const Vector &) = delete;
-    Vector &operator=(const Vector &) = delete;
-    Vector(Vector &&other) noexcept
-        : start_(std::exchange(other.start_, nullptr)),
-          end_(std::exchange(other.end_, nullptr)),
-          cap_(std::exchange(other.cap_, nullptr)) {}
-    Vector &operator=(Vector &&other) noexcept {
+    SharedPtr &operator=(const SharedPtr &other) {
         if (this != &other) {
-            start_ = std::exchange(other.start_, nullptr);
-            end_ = std::exchange(other.end_, nullptr);
-            cap_ = std::exchange(other.cap_, nullptr);
+            copy_from_(other);
+        }
+        return *this;
+    }
+    SharedPtr(SharedPtr &&other) { steal_from_(std::move(other)); }
+    SharedPtr &operator=(SharedPtr &&other) {
+        if (this != &other) {
+            steal_from_(std::move(other));
         }
         return *this;
     }
 
-    auto push_back(const T &x) -> void {
-        if (end_ == cap_) {
-            resize_();
-        }
-        new (end_) T(x);
-        ++end_;
-    }
-    auto push_back(T &&x) -> void {
-        if (end_ == cap_) {
-            resize_();
-        }
-        new (end_) T(std::move(x));
-        ++end_;
-    }
-    template <typename... Ts>
-    auto emplace_back(Ts &&...ts) {
-        if (end_ == cap_) {
-            resize_();
-        }
-        new (end_) T(std::forward<Ts>(ts)...);
-        ++end_;
-    }
+    [[nodiscard]] auto get() const noexcept -> const T * { return ptr_; }
+    [[nodiscard]] auto get() noexcept -> T * { return ptr_; }
 
-    [[nodiscard]] auto operator[](SizeT idx) const noexcept -> const T & {
-        return start_[idx];
-    }
-    [[nodiscard]] auto operator[](SizeT idx) noexcept -> T & {
-        return start_[idx];
-    }
+    [[nodiscard]] auto operator*() const -> const T & { return *ptr_; }
+    [[nodiscard]] auto operator*() -> T & { return *ptr_; }
 
-    [[nodiscard]] auto at(SizeT idx) -> T & {
-        if (idx >= size()) {
-            throw std::runtime_error("Vector::operator[] OOB!");
-        }
-        if (idx >= size()) {
-            throw std::out_of_range("Vector::at() OOB");
-        }
-        return start_[idx];
-    }
-    [[nodiscard]] auto at(SizeT idx) const -> const T & {
-        if (idx >= size()) {
-            throw std::out_of_range("Vector::at() OOB");
-        }
-        return start_[idx];
-    }
+    [[nodiscard]] auto operator->() const -> const T * { return ptr_; }
+    [[nodiscard]] auto operator->() -> T * { return ptr_; }
 
-    [[nodiscard]] auto size() const noexcept -> SizeT { return static_cast<SizeT>(end_ - start_); }
-    [[nodiscard]] auto capacity() const noexcept -> SizeT { return static_cast<SizeT>(cap_ - start_); }
-    [[nodiscard]] auto empty() const noexcept -> bool { return start_ == end_; }
+    [[nodiscard]] auto use_count() const noexcept -> int { return (ctrl_) ? ctrl_->strong_ref : 0; }
 
-private:
-    static constexpr SizeT k_initial_capacity{1};
-
-    T *start_{};
-    T *end_{};
-    T *cap_{};
-
-    auto resize_() -> void {
-        if (!start_) {
-            start_ = static_cast<T *>(::operator new(sizeof(T) * k_initial_capacity));
-            end_ = start_;
-            cap_ = start_ + k_initial_capacity;
+    auto reset() -> void {
+        if (!ptr_) {
             return;
         }
-        const auto old_size = size();
-        const auto old_cap = capacity();
-        const auto new_cap = SizeT{2} * old_cap;
-
-        const auto new_start_ptr = static_cast<T *>(::operator new(sizeof(T) * new_cap));
-        { // Move over all existing elements using move constructor
-            auto new_ptr = new_start_ptr;
-            auto old_ptr = start_;
-            while (old_ptr != end_) {
-                new (new_ptr) T(std::move(*old_ptr));
-                old_ptr->~T();
-                ++new_ptr;
-                ++old_ptr;
-            }
+        if (--ctrl_->strong_ref == 0) {
+            ctrl_->deleter(ptr_);
+            delete ctrl_;
         }
-        ::operator delete(start_);
-        start_ = new_start_ptr;
-        end_ = start_ + old_size;
-        cap_ = start_ + new_cap;
+        ptr_ = nullptr;
+        ctrl_ = nullptr;
+    }
+
+private:
+    struct ControlBlock {
+        std::atomic<int> strong_ref;
+        std::atomic<int> weak_ref; // Out of Scope
+        Deleter deleter;
+    };
+    ControlBlock *ctrl_{};
+    T *ptr_{};
+
+    auto copy_from_(const SharedPtr &other) -> void {
+        reset();
+        ptr_ = other.ptr_;
+        ++other.ctrl_->strong_ref;
+        ctrl_ = other.ctrl_;
+    }
+    auto steal_from_(SharedPtr &&other) -> void {
+        reset();
+        ctrl_ = std::exchange(other.ctrl_, nullptr);
+        ptr_ = std::exchange(other.ptr_, nullptr);
     }
 };
-static_assert(sizeof(Vector<int>) == 3 * sizeof(int *));
