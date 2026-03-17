@@ -1,48 +1,20 @@
 // main.cpp
+
 /*
-Implement a fixed-capacity SPSCRingBuffer<T, N> with:
-- push(T value) -> bool - returns false if full
-- pop() -> std::optional<T> - returns empty if empty
-- Lock-free using std::atomic with acquire/release ordering
-- N must be power of 2
-Write a main() with one producer thread and one consumer thread.
+Implement a templated ThreadSafeQueue<T> with:
+- push(T value) - adds element to back
+- pop() -> T - blocks until element available, returns front element
+- try_pop() -> std::optional<T> - returns immediately, empty optional if queue is empty
+- empty() -> bool
+- size() -> std::size_t
+Use std::mutex and std::condition_variable. Write a main() that tests it.
 */
 
-//                v-- head
-// [ 1, 2, 3, 4][ 1, 2, 3, 4]
-//         ^-- tail
-// push(7)
-//                   v-- head
-// [ 7, 2, 3, 4][ 7, 2, 3, 4]
-//         ^-- tail
-// pop()
-//                   v-- head
-// [ 7, 2, 3, 4][ 7, 2, 3, 4]
-//            ^-- tail
-// pop()
-//                   v-- head
-// [ 7, 2, 3, 4][ 7, 2, 3, 4]
-//                ^-- tail
-// Empty <=> 0 = Number of elements = head - tail
-// pop()
-//                   v-- head
-// [ 7, 2, 3, 4][ 7, 2, 3, 4]
-//                   ^-- tail
-// Empty <=> 0 = Number of elements = head - tail
-// Full: N = number of elements = head - tail
-//                   v-- head
-// [ 7, 2, 3, 4][ 7, 2, 3, 4]
-//         ^-- tail
-
-#include <algorithm>
-#include <array>
-#include <atomic>
-#include <cstddef>
-#include <cstdint>
-#include <optional>
-#include <stdexcept>
-#include <type_traits>
-#include <utility>
+#include <condition_variable> // Condition variable, notify_one(), wait()
+#include <mutex>              // Mutual Exclusion, lock(), unlock()
+#include <optional>           // std::nullopt
+#include <queue>              // front(), pop(), empty(), size();
+#include <utility>            // std::move(...) === static_cast<std::remove_reference<T>&&>(...)
 
 using usize = std::size_t;
 using isize = std::ptrdiff_t;
@@ -67,118 +39,46 @@ using f32 = float;
 using f64 = double;
 #endif
 
-/*
-Implement a templated Vector<T> with:
-push_back(const T&) and push_back(T&&)
-emplace_back(Args&&...)
-operator[], at(), size(), capacity()
-Destructor, move constructor, move assignment
-Amortized doubling with ::operator new, placement new, manual destroy, ::operator delete
-*/
-
 template <typename T>
-class Vector {
+class ThreadSafeQueue {
 public:
-    Vector() = default;
-    ~Vector() {
-        reset_();
+    auto push(T value) -> void {
+        std::scoped_lock sl{m_};
+        q_.push(std::move(value)); // If we copied value don't re-copy
+        cv_.notify_one();
     }
 
-    Vector(Vector &&other) noexcept
-        : start_(std::exchange(other.start_, nullptr)),
-          end_(std::exchange(other.end_, nullptr)),
-          cap_(std::exchange(other.cap_, nullptr)) {}
-    Vector &operator=(Vector &&other) noexcept {
-        if (this != &other) {
-            reset_();
-            start_ = std::exchange(other.start_, nullptr);
-            end_ = std::exchange(other.end_, nullptr);
-            cap_ = std::exchange(other.cap_, nullptr);
-        }
-        return *this;
-    }
-    Vector(const Vector &) = delete;
-    Vector &operator=(const Vector &) = delete;
-
-    auto push_back(const T &x) -> void {
-        if (end_ == cap_) {
-            resize_();
-        }
-        new (end_) T(x);
-        ++end_;
-    }
-    auto push_back(T &&x) -> void {
-        if (end_ == cap_) {
-            resize_();
-        }
-        new (end_) T(std::move(x));
-        ++end_;
-    }
-    template <typename... Ts>
-    auto emplace_back(Ts &&...ts) -> void {
-        if (end_ == cap_) {
-            resize_();
-        }
-        new (end_) T(std::forward<Ts>(ts)...);
-        ++end_;
+    auto pop() -> T {
+        // Can lock and relock, if locked on scope leave it unlocks -> more expensive than scoped_lock
+        std::unique_lock _ul{m_};
+        cv_.wait(_ul, [this] { return !q_.empty(); });
+        return pop_();
     }
 
-    [[nodiscard]] auto operator[](usize i) -> T & { return start_[i]; }
-    [[nodiscard]] auto operator[](usize i) const -> const T & { return start_[i]; }
-    [[nodiscard]] auto at(usize i) -> T & {
-        if (i >= size()) {
-            throw std::out_of_range("Vector::at() OOB");
+    auto try_pop() -> std::optional<T> {
+        std::scoped_lock _sl{m_}; // RAII wrapper, lock on constructor, unlock on destructor
+        if (q_.empty()) {
+            return std::nullopt; // [*garbage*, false]
         }
-        return start_[i];
+        return pop_();
     }
-    [[nodiscard]] auto at(usize i) const -> const T & {
-        if (i >= size()) {
-            throw std::out_of_range("Vector::at() OOB");
-        }
-        return start_[i];
+    [[nodiscard]] auto empty() const -> bool {
+        std::scoped_lock _sl{m_};
+        return q_.empty();
     }
-    [[nodiscard]] auto size() const noexcept -> usize { return end_ - start_; }
-    [[nodiscard]] auto capacity() const noexcept -> usize { return cap_ - start_; }
+    [[nodiscard]] auto size() const -> usize {
+        std::scoped_lock _sl{m_};
+        return q_.size();
+    }
 
 private:
-    static constexpr usize k_initial_cap{1};
-    T *start_{};
-    T *end_{};
-    T *cap_{};
+    mutable std::condition_variable cv_{}; // Condition variable, blocks and allows notifying blocked threads
+    mutable std::mutex m_{};               // mutable, as this does not affect the classes' invariants
+    std::queue<T> q_{};                    // FIFO [] -> [1] -> [1, 2] -> [1, 2, 3] -> [2, 3]
 
-    auto resize_() -> void {
-        if (!start_) {
-            start_ = static_cast<T *>(::operator new(sizeof(T) * k_initial_cap));
-            end_ = start_;
-            cap_ = start_ + k_initial_cap;
-            return;
-        }
-        const auto s = size();
-        const auto c = 2zu * capacity();
-
-        const auto new_start = static_cast<T *>(::operator new(sizeof(T) * c));
-        auto nptr = new_start;
-        auto optr = start_;
-        while (optr != end_) {
-            new (nptr) T{std::move(*optr)};
-            optr->~T();
-            ++nptr;
-            ++optr;
-        }
-        ::operator delete(start_);
-        start_ = new_start;
-        end_ = new_start + s;
-        cap_ = new_start + c;
-    }
-
-    auto reset_() -> void {
-        if (!start_) {
-            return;
-        }
-        for (auto p = start_; p != end_; ++p) {
-            p->~T();
-        }
-        ::operator delete(start_);
+    auto pop_() -> T {
+        auto out = std::move(q_.front()); // static_cast<std::remove_reference_t<T>&&>(q_);
+        q_.pop();                         // Removes from front as Queues have FIFO semantics
+        return out;                       // [q_.front(), true]
     }
 };
-static_assert(sizeof(Vector<int>) == 3 * sizeof(int *));
