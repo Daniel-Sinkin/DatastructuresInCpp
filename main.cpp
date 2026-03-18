@@ -1,85 +1,119 @@
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+string ltrim(const string &);
+string rtrim(const string &);
+
+template <typename T, typename U>
+struct IsSame : std::false_type {};
+template <typename T>
+struct IsSame<T, T> : std : true_type {};
+
+template <typename T>
+struct RemoveConst {
+    using type = T;
+};
+template <typename T>
+struct RemoveConst<const T> {
+    using type = T;
+};
+
+template <typename... Xs>
+struct IsOneOf : std::false_type {};
+template <typename T>
+struct IsOneOf<T, T> : std::true_type {};
+template <typename T, typename X, typename... Xs>
+struct IsOneOf<T, X, Xs...> {
+    static constexpr bool value{IsOneOf<T, X>::value or IsOneOf<T, Xs...>::value};
+};
+
+template <typename X, typename... Xs>
+auto print(X &&x, Xs &&...xs) -> void {
+    std::cout << x;
+    if constexpr (sizeof...(Xs) == 0) {
+        std::cout << '\n';
+    } else {
+        std::cout << ", ";
+        print(std::forward<Xs>(xs)...);
+    }
+}
+
+template <typename... Ts>
+struct Tuple<> {};
+template <typename T, typename... Ts>
+struct Tuple<T, Ts...> : Tuple<Ts...> {
+    T value;
+
+    Tuple(T &&val, Ts &&...ts) : Tuple<Ts...>(std::move(ts)...), value(std::move(val)) {}
+};
+
+template <usize N, typename T, typename... Ts>
+    requires(N < 1 + sizeof...(Ts))
+auto get(Tuple<T, Ts...> &t) -> auto & {
+    if constexpr (N == 0) {
+        return t.value;
+    } else {
+        return get<N - 1>(static_cast<Tuple<Ts...> &>(t));
+    }
+}
+
 /*
-Implement a templated SharedPtr<T> with:
-- Control block with atomic strong count
-- Constructor from raw pointer, default constructor
-- Destructor, copy constructor/assignment, move constructor/assignment
-- operator*, operator->, get()
-- use_count(), reset()
+Implement TypeList<Ts...> with:
+- Size: number of types
+- Get<N>: Nth type (zero-indexed), via a separate helper
+- Contains<T>: check if T is in the list
 */
+template <usize N, typename... Ts>
+struct TypeListGet {
+    using type = void;
+};
+template <usize N, typename T, typename... Ts>
+struct TypeListGet<N, T, Ts...> {
+    using type = typename TypeListGet<N - 1, Ts...>::type;
+};
+template <typename T, typename... Ts>
+struct TypeListGet<0, T, Ts...> {
+    using type = T;
+}
 
-#include <atomic>
-#include <cstdint>
-#include <memory>
-
-using u32 = std::uint32_t;
-
-template <typename Deleter, typename T>
-concept IsDeleter = requires(Deleter d, T *t) {
-    { d(t) } noexcept -> std::same_as<void>; // Deleter must not throw
+template <typename... Ts>
+struct TypeList {
+    static constexpr usize Size{sizeof...(Ts)};
+    template <typename S>
+    static constexpr bool Contains { IsOneOf<S, Ts...>::value; };
+    template <usize N>
+    using Get = typename TypeListGet<N, Ts...>::type;
 };
 
-template <typename T, IsDeleter<T> Deleter = std::default_delete<T>>
-class SharedPtr {
-public:
-    SharedPtr() = default;
-    SharedPtr(T *ptr) : ptr_(ptr), cb_(new ControlBlock{1, 0, Deleter{}}) {}
-    ~SharedPtr() { release(); }
-    SharedPtr(const SharedPtr &other) noexcept {
-        copy_from(other);
-    }
-    SharedPtr &operator=(const SharedPtr &other) noexcept {
-        if (this != &other) {
-            release();
-            copy_from(other);
-        }
-        return *this;
-    }
-    SharedPtr(SharedPtr &&other) noexcept
-        : ptr_(std::exchange(other.ptr_, nullptr)), cb_(std::exchange(other.cb_, nullptr)) {}
-    SharedPtr &operator=(SharedPtr &&other) noexcept {
-        if (this != &other) {
-            release();
-            ptr_ = std::exchange(other.ptr_, nullptr);
-            cb_ = std::exchange(other.cb_, nullptr);
-        }
-        return *this;
-    }
+int main() {
+    string n_temp;
+    getline(cin, n_temp);
 
-    auto get() noexcept -> T * { return ptr_; }
-    auto get() const noexcept -> const T * { return ptr_; }
-    auto operator->() noexcept -> T * { return ptr_; }
-    auto operator->() const noexcept -> const T * { return ptr_; }
-    auto operator*() -> T & { return *ptr_; }
-    auto operator*() const -> const T & { return *ptr_; }
+    int n = stoi(ltrim(rtrim(n_temp)));
 
-    auto use_count() const noexcept -> u32 {
-        return (cb_) ? cb_->strong_ref.load(std::memory_order_relaxed) : 0;
-    }
-    auto release() noexcept -> void {
-        if (!cb_)
-            return;
-        if (cb_->strong_ref.fetch_sub(1, std::memory_order_acq_rel) == 1) {
-            cb_->deleter(ptr_);
-            delete (cb_);
-        }
-        cb_ = nullptr;
-        ptr_ = nullptr;
-    }
+    fizzBuzz(n);
 
-private:
-    struct ControlBlock {
-        std::atomic<u32> strong_ref;
-        std::atomic<u32> weak_ref;
-        [[no_unique_address]] Deleter deleter; // EBO Optimisation
-    };
-    T *ptr_{};
-    ControlBlock *cb_{};
+    return 0;
+}
 
-    auto copy_from(const SharedPtr &other) noexcept -> void {
-        if (!other.cb_)
-            return;
-        cb_ = other.cb_;
-        cb_->strong_ref.fetch_add(1, std::memory_order_acq_rel);
-        ptr_ = other.ptr_;
-    }
-};
+string ltrim(const string &str) {
+    string s(str);
+
+    s.erase(
+        s.begin(),
+        find_if(s.begin(), s.end(), not1(ptr_fun<int, int>(isspace))));
+
+    return s;
+}
+
+string rtrim(const string &str) {
+    string s(str);
+
+    s.erase(
+        find_if(s.rbegin(), s.rend(), not1(ptr_fun<int, int>(isspace))).base(),
+        s.end());
+
+    return s;
+}
