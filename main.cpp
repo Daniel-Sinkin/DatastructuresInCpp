@@ -1,119 +1,141 @@
+#include <cstddef>
+#include <exception>
+#include <new>
+#include <type_traits>
+#include <utility>
 
-#include <bits/stdc++.h>
+struct BadOptionalAccess : std::exception {};
 
-using namespace std;
-
-string ltrim(const string &);
-string rtrim(const string &);
-
-template <typename T, typename U>
-struct IsSame : std::false_type {};
-template <typename T>
-struct IsSame<T, T> : std : true_type {};
+struct Nulloptional {};
 
 template <typename T>
-struct RemoveConst {
-    using type = T;
-};
-template <typename T>
-struct RemoveConst<const T> {
-    using type = T;
-};
-
-template <typename... Xs>
-struct IsOneOf : std::false_type {};
-template <typename T>
-struct IsOneOf<T, T> : std::true_type {};
-template <typename T, typename X, typename... Xs>
-struct IsOneOf<T, X, Xs...> {
-    static constexpr bool value{IsOneOf<T, X>::value or IsOneOf<T, Xs...>::value};
-};
-
-template <typename X, typename... Xs>
-auto print(X &&x, Xs &&...xs) -> void {
-    std::cout << x;
-    if constexpr (sizeof...(Xs) == 0) {
-        std::cout << '\n';
-    } else {
-        std::cout << ", ";
-        print(std::forward<Xs>(xs)...);
+class Optional {
+public:
+    Optional() = default;
+    explicit Optional(const T &val) {
+        new (reinterpret_cast<T *>(buffer_)) T{val};
+        has_value_ = true;
     }
-}
-
-template <typename... Ts>
-struct Tuple<> {};
-template <typename T, typename... Ts>
-struct Tuple<T, Ts...> : Tuple<Ts...> {
-    T value;
-
-    Tuple(T &&val, Ts &&...ts) : Tuple<Ts...>(std::move(ts)...), value(std::move(val)) {}
-};
-
-template <usize N, typename T, typename... Ts>
-    requires(N < 1 + sizeof...(Ts))
-auto get(Tuple<T, Ts...> &t) -> auto & {
-    if constexpr (N == 0) {
-        return t.value;
-    } else {
-        return get<N - 1>(static_cast<Tuple<Ts...> &>(t));
+    explicit Optional(T &&val) {
+        new (reinterpret_cast<T *>(buffer_)) T{std::move(val)};
+        has_value_ = true;
     }
-}
+    ~Optional() { reset(); }
 
-/*
-Implement TypeList<Ts...> with:
-- Size: number of types
-- Get<N>: Nth type (zero-indexed), via a separate helper
-- Contains<T>: check if T is in the list
-*/
-template <usize N, typename... Ts>
-struct TypeListGet {
-    using type = void;
+    Optional(Nulloptional) noexcept {}
+
+    Optional(const Optional &other) noexcept(std::is_nothrow_copy_constructible_v<T>) {
+        copy_from(other);
+    }
+    Optional &operator=(const Optional &other) noexcept(std::is_nothrow_copy_constructible_v<T>) {
+        if (this != &other) {
+            reset();
+            copy_from(other);
+        }
+        return *this;
+    }
+    Optional(Optional &&other) noexcept(std::is_nothrow_move_constructible_v<T>) {
+        steal_from(std::move(other));
+    }
+    Optional &operator=(Optional &&other) noexcept(std::is_nothrow_move_constructible_v<T>) {
+        if (this != &other) {
+            reset();
+            steal_from(std::move(other));
+        }
+        return *this;
+    }
+
+    [[nodiscard]] friend bool operator==(const Optional &left, const Optional &right) {
+        if (left.has_value_ and right.has_value_) {
+            return *left.ptr_() == *right.ptr_();
+        } else {
+            return left.has_value_ == right.has_value_;
+        }
+    }
+    [[nodiscard]] friend bool operator==(const Optional &left, [[maybe_unused]] const Nulloptional &) {
+        return !left.has_value_;
+    }
+    [[nodiscard]] friend bool operator==([[maybe_unused]] const Nulloptional &, const Optional &right) {
+        return !right.has_value_;
+    }
+    [[nodiscard]] friend bool operator==(const Optional &left, const T &right) {
+        return left.has_value_ && (*left.ptr_() == right);
+    }
+    [[nodiscard]] friend bool operator==(const T &left, const Optional &right) {
+        return right.has_value_ && (left == *right.ptr_());
+    }
+
+    template <typename... Ts>
+    auto emplace(Ts &&...ts) -> T & {
+        reset();
+        new (reinterpret_cast<T *>(buffer_)) T{std::forward<Ts>(ts)...};
+        has_value_ = true;
+        return *ptr_();
+    }
+
+    [[nodiscard]] auto has_value() const noexcept -> bool { return has_value_; }
+    [[nodiscard]] explicit operator bool() const noexcept { return has_value_; }
+
+    [[nodiscard]] auto value() -> T & {
+        if (!has_value_)
+            throw BadOptionalAccess{};
+        return *ptr_();
+    }
+    [[nodiscard]] auto value() const -> const T & {
+        if (!has_value_)
+            throw BadOptionalAccess{};
+        return *ptr_();
+    }
+    [[nodiscard]] auto operator*() -> T & { return *ptr_(); }
+    [[nodiscard]] auto operator*() const -> const T & { return *ptr_(); }
+    [[nodiscard]] auto operator->() -> T * { return ptr_(); }
+    [[nodiscard]] auto operator->() const -> const T * { return ptr_(); }
+
+    template <typename U>
+    [[nodiscard]] auto value_or(U &&u) -> T {
+        if (has_value_) {
+            return *ptr_();
+        } else {
+            return static_cast<T>(std::forward<U>(u));
+        }
+    }
+
+    auto reset() noexcept -> void {
+        if (has_value_) {
+            ptr_()->~T();
+            has_value_ = false;
+        }
+    }
+
+private:
+    alignas(T) std::byte buffer_[sizeof(T)];
+    bool has_value_{false};
+
+    auto copy_from(const Optional &other) -> void {
+        if (other.has_value_) {
+            new (reinterpret_cast<T *>(buffer_)) T{*other.ptr_()};
+            has_value_ = true;
+        }
+    }
+    auto steal_from(Optional &&other) -> void {
+        if (other.has_value_) {
+            new (reinterpret_cast<T *>(buffer_)) T{std::move(*other.ptr_())};
+            other.reset();
+            has_value_ = true;
+        }
+    }
+
+    [[nodiscard]] auto ptr_() noexcept -> T * {
+        return std::launder(reinterpret_cast<T *>(buffer_));
+    }
+    [[nodiscard]] auto ptr_() const noexcept -> const T * {
+        return std::launder(reinterpret_cast<const T *>(buffer_));
+    }
 };
-template <usize N, typename T, typename... Ts>
-struct TypeListGet<N, T, Ts...> {
-    using type = typename TypeListGet<N - 1, Ts...>::type;
-};
-template <typename T, typename... Ts>
-struct TypeListGet<0, T, Ts...> {
-    using type = T;
-}
 
-template <typename... Ts>
-struct TypeList {
-    static constexpr usize Size{sizeof...(Ts)};
-    template <typename S>
-    static constexpr bool Contains { IsOneOf<S, Ts...>::value; };
-    template <usize N>
-    using Get = typename TypeListGet<N, Ts...>::type;
-};
-
-int main() {
-    string n_temp;
-    getline(cin, n_temp);
-
-    int n = stoi(ltrim(rtrim(n_temp)));
-
-    fizzBuzz(n);
-
-    return 0;
-}
-
-string ltrim(const string &str) {
-    string s(str);
-
-    s.erase(
-        s.begin(),
-        find_if(s.begin(), s.end(), not1(ptr_fun<int, int>(isspace))));
-
-    return s;
-}
-
-string rtrim(const string &str) {
-    string s(str);
-
-    s.erase(
-        find_if(s.rbegin(), s.rend(), not1(ptr_fun<int, int>(isspace))).base(),
-        s.end());
-
-    return s;
+template <typename T, typename... Args>
+auto make_optional(Args &&...args) -> Optional<T> {
+    Optional<T> out{};
+    out.emplace(std::forward<Args>(args)...);
+    return out;
 }
