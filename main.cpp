@@ -58,12 +58,10 @@ using Matrix64 = Matrix<f64, N, M>;
 
 template <std::floating_point T, usize N, usize K, usize M>
 auto GEMM(const Matrix<T, N, K> &A, const Matrix<T, K, M> &B, Matrix<T, N, M> &C) -> void {
-    // Naive implementation
     for (usize n{0}; n < N; ++n) {
         for (usize m{0}; m < M; ++m) {
             T accum{0};
             for (usize k{0}; k < K; ++k) {
-                // Row * column <- column is strided == bad memory access pattern
                 accum += A(n, k) * B(k, m);
             }
             C(n, m) = accum;
